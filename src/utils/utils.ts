@@ -212,6 +212,12 @@ export class Utils {
     return getAddressDetails(address);
   }
 
+  // CUSTOMISATIONS ---------------------------------------------------------------
+  privateKeyFromBytes(bytes) {
+    return C.PrivateKey.from_normal_bytes(bytes)
+  }
+  // END CUSTOMISATIONS ---------------------------------------------------------------
+
   /**
    * Convert a native script from Json to the Hex representation.
    * It follows this Json format: https://github.com/input-output-hk/cardano-node/blob/master/doc/reference/simple-scripts.md

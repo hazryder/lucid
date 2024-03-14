@@ -1,3 +1,4 @@
+import { TransactionUnspentOutput } from "../core/libs/cardano_multiplatform_lib/cardano_multiplatform_lib.generated.js";
 import { C } from "../core/mod.ts";
 
 type CostModel = Record<string, number>;
@@ -183,6 +184,8 @@ export interface Wallet {
     payload: Payload,
   ): Promise<SignedMessage>;
   submitTx(signedTx: Transaction): Promise<TxHash>;
+  getUtxosForAssetsCore(assets: any): any;
+  getChangeUtxoCore(): any;
 }
 
 /** JSON object */

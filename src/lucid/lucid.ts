@@ -294,6 +294,12 @@ export class Lucid {
       submitTx: async (tx: Transaction): Promise<TxHash> => {
         return await this.provider.submitTx(tx);
       },
+      getUtxosForAssetsCore(assets) {
+        throw new Error('Not implemented for this wallet type')
+      },
+      getChangeUtxoCore() {
+        throw new Error('Not implemented for this wallet type')
+      },
     };
     return this;
   }
@@ -362,6 +368,12 @@ export class Lucid {
       submitTx: async (tx: Transaction): Promise<TxHash> => {
         const txHash = await api.submitTx(tx);
         return txHash;
+      },
+      getUtxosForAssetsCore(assets) {
+        throw new Error('Not implemented for this wallet type')
+      },
+      getChangeUtxoCore() {
+        throw new Error('Not implemented for this wallet type')
       },
     };
     return this;
@@ -435,6 +447,48 @@ export class Lucid {
       submitTx: async (tx: Transaction): Promise<TxHash> => {
         return await this.provider.submitTx(tx);
       },
+      // CUSTOMISATIONS ---------------------------------------------------------------
+      getUtxosForAssetsCore: async (assets) => {
+        // Build array of unique utxos required to send supplied assets
+        var uniqueUtxos: any = []
+
+        for(const asset of assets) {
+            const assetUtxos = await this.utxosAtWithUnit(address, asset)
+
+            if(!uniqueUtxos.map(e => e.txHash).includes(assetUtxos[0].txHash)) {
+                uniqueUtxos.push(assetUtxos[0])
+            }
+        }
+
+        // Convert to core objs
+        const coreUtxos = C.TransactionUnspentOutputs.new()
+
+        for(const utxo of uniqueUtxos) {
+            coreUtxos.add(utxoToCore(utxo))
+        }
+
+        return coreUtxos
+    },
+    // Gets the single utxo containing only ADA, with the largest amount
+    getChangeUtxoCore: async () => {
+        const _utxos = utxos?? await this.utxosAt(address)
+
+        var largestAmount: bigint = BigInt(0)
+        var changeUtxo
+
+        for(const utxo of _utxos) {
+            if(Object.keys(utxo.assets).length === 1 && Object.keys(utxo.assets)[0] === "lovelace") {
+                if(utxo.assets.lovelace > largestAmount) {
+                    largestAmount = utxo.assets.lovelace
+
+                    changeUtxo = utxo
+                }
+            }
+        }
+
+        return utxoToCore(changeUtxo)
+    },
+    // END CUSTOMISATIONS ---------------------------------------------------------------
     };
     return this;
   }
@@ -542,6 +596,12 @@ export class Lucid {
       },
       submitTx: async (tx: Transaction): Promise<TxHash> => {
         return await this.provider.submitTx(tx);
+      },
+      getUtxosForAssetsCore(assets) {
+        throw new Error('Not implemented for this wallet type')
+      },
+      getChangeUtxoCore() {
+        throw new Error('Not implemented for this wallet type')
       },
     };
     return this;

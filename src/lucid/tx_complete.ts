@@ -54,6 +54,14 @@ export class TxComplete {
     return this;
   }
 
+  // CUSTOMISATIONS ---------------------------------------------------------------
+  signWithSkey(privateKey) {
+    const witness = C.make_vkey_witness(C.hash_transaction(this.txComplete.body()), privateKey);
+    this.witnessSetBuilder.add_vkey(witness);
+    return this;
+  }
+  // END CUSTOMISATIONS -----------------------------------------------------------
+
   /** Sign the transaction and return the witnesses that were just made. */
   async partialSign(): Promise<TransactionWitnesses> {
     const witnesses = await this.lucid.wallet.signTx(this.txComplete);

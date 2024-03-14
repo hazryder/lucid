@@ -76,15 +76,15 @@ export class Tx {
         that.txBuilder.add_input(
           coreUtxo,
           (redeemer as undefined) &&
-            C.ScriptWitness.new_plutus_witness(
-              C.PlutusWitness.new(
-                C.PlutusData.from_bytes(fromHex(redeemer!)),
-                utxo.datumHash && utxo.datum
-                  ? C.PlutusData.from_bytes(fromHex(utxo.datum!))
-                  : undefined,
-                undefined,
-              ),
+          C.ScriptWitness.new_plutus_witness(
+            C.PlutusWitness.new(
+              C.PlutusData.from_bytes(fromHex(redeemer!)),
+              utxo.datumHash && utxo.datum
+                ? C.PlutusData.from_bytes(fromHex(utxo.datum!))
+                : undefined,
+              undefined,
             ),
+          ),
         );
       }
     });
@@ -526,6 +526,7 @@ export class Tx {
     change?: { address?: Address; outputData?: OutputData };
     coinSelection?: boolean;
     nativeUplc?: boolean;
+    utxos?: any
   }): Promise<TxComplete> {
     if (
       [
@@ -546,7 +547,9 @@ export class Tx {
       task = this.tasks.shift();
     }
 
-    const utxos = await this.lucid.wallet.getUtxosCore();
+    // CUSTOMISATIONS ---------------------------------------------------------------
+    const utxos = options?.utxos ?? await this.lucid.wallet.getUtxosCore();
+    // END CUSTOMISATIONS -----------------------------------------------------------
 
     const changeAddress: C.Address = addressFromWithNetworkCheck(
       options?.change?.address || (await this.lucid.wallet.address()),
